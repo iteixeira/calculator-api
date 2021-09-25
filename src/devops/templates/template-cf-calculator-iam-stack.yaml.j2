@@ -1,0 +1,202 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "Calculator IAM Stack - {{ ParamENV }} (updated at: {{ PlaybookDeployDateISO8601 }})."
+Parameters:
+  ParamTagName:
+    Type: String
+    Default: {{ ParamTagName }}
+
+  # Policies
+  ParamNetworkInterfacePolicyName:
+    Type: String
+    Default: {{ ParamNetworkInterfacePolicyName }}
+
+  ParamCloudWatchLogsPolicyName:
+    Type: String
+    Default: {{ ParamCloudWatchLogsPolicyName }}
+
+  ParamLambdaInvokePolicyName:
+    Type: String
+    Default: {{ ParamLambdaInvokePolicyName }}
+
+  # Roles
+  ParamCalculatorAddRoleName:
+    Type: String
+    Default: {{ ParamCalculatorAddRoleName }}
+  
+  ParamCalculatorSubtractRoleName:
+    Type: String
+    Default: {{ ParamCalculatorSubtractRoleName }}
+  
+  ParamCalculatorMultiplyRoleName:
+    Type: String
+    Default: {{ ParamCalculatorMultiplyRoleName }}
+  
+  ParamCalculatorDivideRoleName:
+    Type: String
+    Default: {{ ParamCalculatorDivideRoleName }}
+
+Resources:
+  # ============= Policies =============
+  CalculatorNetworkInterfacePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Path: "/"
+      ManagedPolicyName: !Ref ParamNetworkInterfacePolicyName
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - "ec2:CreateNetworkInterface"
+              - "ec2:DescribeNetworkInterfaces"
+              - "ec2:DeleteNetworkInterface"
+            Resource: "*"
+            Effect: Allow
+
+  CalculatorCloudWatchLogsPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Path: "/"
+      ManagedPolicyName: !Ref ParamCloudWatchLogsPolicyName
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - "logs:CreateLogStream"
+              - "logs:CreateLogGroup"
+              - "logs:PutLogEvents"
+            Effect: Allow
+            Resource: "*"
+
+  CalculatorLambdaInvokePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Path: "/"
+      ManagedPolicyName: !Ref ParamLambdaInvokePolicyName
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - "lambda:InvokeFunction"
+            Effect: Allow
+            Resource: "arn:aws:lambda:*:*:function:*"
+
+  # ============= Roles =============
+  CalculatorAddLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref ParamCalculatorAddRoleName
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+              - "lambda.amazonaws.com"
+              - "apigateway.amazonaws.com"
+      ManagedPolicyArns:
+        - !Ref CalculatorNetworkInterfacePolicy
+        - !Ref CalculatorLambdaInvokePolicy
+        - !Ref CalculatorCloudWatchLogsPolicy
+      Tags:
+        - Key: Application
+          Value: !Sub "{{ ParamTagName }}"
+
+  CalculatorSubtractLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref ParamCalculatorSubtractRoleName
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+              - "lambda.amazonaws.com"
+              - "apigateway.amazonaws.com"
+      ManagedPolicyArns:
+        - !Ref CalculatorNetworkInterfacePolicy
+        - !Ref CalculatorLambdaInvokePolicy
+        - !Ref CalculatorCloudWatchLogsPolicy
+      Tags:
+        - Key: Application
+          Value: !Sub "{{ ParamTagName }}"
+
+  CalculatorMultiplyLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref ParamCalculatorMultiplyRoleName
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+              - "lambda.amazonaws.com"
+              - "apigateway.amazonaws.com"
+      ManagedPolicyArns:
+        - !Ref CalculatorNetworkInterfacePolicy
+        - !Ref CalculatorLambdaInvokePolicy
+        - !Ref CalculatorCloudWatchLogsPolicy
+      Tags:
+        - Key: Application
+          Value: !Sub "{{ ParamTagName }}"
+
+  CalculatorDivideLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref ParamCalculatorDivideRoleName
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+              - "lambda.amazonaws.com"
+              - "apigateway.amazonaws.com"
+      ManagedPolicyArns:
+        - !Ref CalculatorNetworkInterfacePolicy
+        - !Ref CalculatorLambdaInvokePolicy
+        - !Ref CalculatorCloudWatchLogsPolicy
+      Tags:
+        - Key: Application
+          Value: !Sub "{{ ParamTagName }}"
+
+Outputs:
+  OutputCalculatorAddLambdaRoleArn:
+    Description: Output for Calculator Add Lambda Role
+    Value: !GetAtt CalculatorAddLambdaRole.Arn
+    Export:
+      Name: !Ref ParamCalculatorAddRoleName
+
+  OutputCalculatorSubtractLambdaRoleArn:
+    Description: Output for Calculator Subtract Lambda Role
+    Value: !GetAtt CalculatorSubtractLambdaRole.Arn
+    Export:
+      Name: !Ref ParamCalculatorSubtractRoleName
+
+  OutputCalculatorMultiplyLambdaRoleArn:
+    Description: Output for Calculator Multiply Lambda Role
+    Value: !GetAtt CalculatorMultiplyLambdaRole.Arn
+    Export:
+      Name: !Ref ParamCalculatorMultiplyRoleName
+
+  OutputCalculatorDivideLambdaRoleArn:
+    Description: Output for Calculator Divide Lambda Role
+    Value: !GetAtt CalculatorDivideLambdaRole.Arn
+    Export:
+      Name: !Ref ParamCalculatorDivideRoleName
+
+  OutputCalculatorCloudWatchLogsPolicyArn:
+    Description: Output for Calculator CloudWatchLogs Policy
+    Value: !Ref CalculatorCloudWatchLogsPolicy
+    Export:
+      Name: !Ref ParamCloudWatchLogsPolicyName

@@ -1,0 +1,237 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "Calculator API Gateway Stack - {{ ParamENV }} (updated at: {{ PlaybookDeployDateISO8601 }})."
+
+Parameters:
+  ParamTagName:
+    Type: String
+    Default: {{ ParamTagName }}
+
+  # ROLE
+  ParamCalculatorAddRoleName:
+    Type: String
+    Default: {{ ParamCalculatorAddRoleName }}
+
+  ParamCalculatorSubtractRoleName:
+    Type: String
+    Default: {{ ParamCalculatorSubtractRoleName }}
+
+  ParamCalculatorMultiplyRoleName:
+    Type: String
+    Default: {{ ParamCalculatorMultiplyRoleName }}
+
+  ParamCalculatorDivideRoleName:
+    Type: String
+    Default: {{ ParamCalculatorDivideRoleName }}
+
+  # LAMBDA
+  ParamCalculatorAddLambdaName:
+    Type: String
+    Default: {{ ParamCalculatorAddLambdaName }}
+
+  ParamCalculatorSubtractLambdaName:
+    Type: String
+    Default: {{ ParamCalculatorSubtractLambdaName }}
+
+  ParamCalculatorMultiplyLambdaName:
+    Type: String
+    Default: {{ ParamCalculatorMultiplyLambdaName }}
+
+  ParamCalculatorDivideLambdaName:
+    Type: String
+    Default: {{ ParamCalculatorDivideLambdaName }}
+
+  # API Gateway
+  ParamApiGatewayStageName:
+    Type: String
+    Default: {{ ParamApiGatewayStageName }}
+
+  ParamApiGatewayName:
+    Type: String
+    Default: {{ ParamApiGatewayName }}
+
+Resources:
+  # =============== Lambda Permission ===============
+  CalculatorApiGatewayInvokeCalculatorAddLambdaPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGatewayRestApi
+    Properties:
+      FunctionName: !Sub "{{ ParamCalculatorAddLambdaName }}"
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/GET/v1/calculator/add"
+
+  CalculatorApiGatewayInvokeCalculatorSubtractLambdaPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGatewayRestApi
+    Properties:
+      FunctionName: !Sub "{{ ParamCalculatorSubtractLambdaName }}"
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/GET/v1/calculator/subtract"
+
+  CalculatorApiGatewayInvokeCalculatorMultiplyLambdaPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGatewayRestApi
+    Properties:
+      FunctionName: !Sub "{{ ParamCalculatorMultiplyLambdaName }}"
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/GET/v1/calculator/multiply"
+
+  CalculatorApiGatewayInvokeCalculatorDivideLambdaPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: ApiGatewayRestApi
+    Properties:
+      FunctionName: !Sub "{{ ParamCalculatorDivideLambdaName }}"
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/GET/v1/calculator/divide"
+
+  ApiGatewayRestApi:
+    Type: "AWS::ApiGatewayV2::Api"
+    Properties:
+      Description: Calculator API
+      ProtocolType: "HTTP"
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+        AllowOrigins:
+          - "*"
+      Name: !Sub "{{ ParamApiGatewayName }}"
+      Tags:
+        Application: !Sub "{{ ParamTagName }}"
+
+  ApiGatewayCalculatorAddIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId:
+        !Ref "ApiGatewayRestApi"
+      Description: Calculator Add Route Integration
+      PayloadFormatVersion: 1.0
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri:
+        !Sub "{{ ApiGatewayUriBase }}arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:{{ ParamCalculatorAddLambdaName }}/invocations"
+
+  ApiGatewayCalculatorAddRoute:
+    Type: AWS::ApiGatewayV2::Route
+    DependsOn:
+      - ApiGatewayCalculatorAddIntegration
+    Properties:
+      ApiId:
+        !Ref "ApiGatewayRestApi"
+      RouteKey: "GET /v1/calculator/add"
+      Target:
+        Fn::Join:
+          - "/"
+          - - "integrations"
+            - !Ref ApiGatewayCalculatorAddIntegration
+
+  ApiGatewayCalculatorSubtractIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId:
+        !Ref "ApiGatewayRestApi"
+      Description: Calculator Subtract Route Integration
+      PayloadFormatVersion: 1.0
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri:
+        !Sub "{{ ApiGatewayUriBase }}arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:{{ ParamCalculatorSubtractLambdaName }}/invocations"
+
+  ApiGatewayCalculatorSubtractRoute:
+    Type: AWS::ApiGatewayV2::Route
+    DependsOn:
+      - ApiGatewayCalculatorSubtractIntegration
+    Properties:
+      ApiId:
+        !Ref "ApiGatewayRestApi"
+      RouteKey: "GET /v1/calculator/subtract"
+      Target:
+        Fn::Join:
+          - "/"
+          - - "integrations"
+            - !Ref ApiGatewayCalculatorSubtractIntegration
+
+  ApiGatewayCalculatorMultiplyIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId:
+        !Ref "ApiGatewayRestApi"
+      Description: Calculator Multiply Route Integration
+      PayloadFormatVersion: 1.0
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri:
+        !Sub "{{ ApiGatewayUriBase }}arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:{{ ParamCalculatorMultiplyLambdaName }}/invocations"
+
+  ApiGatewayCalculatorMultiplyRoute:
+    Type: AWS::ApiGatewayV2::Route
+    DependsOn:
+      - ApiGatewayCalculatorMultiplyIntegration
+    Properties:
+      ApiId:
+        !Ref "ApiGatewayRestApi"
+      RouteKey: "GET /v1/calculator/multiply"
+      Target:
+        Fn::Join:
+          - "/"
+          - - "integrations"
+            - !Ref ApiGatewayCalculatorMultiplyIntegration
+
+  ApiGatewayCalculatorDivideIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId:
+        !Ref "ApiGatewayRestApi"
+      Description: Calculator Divide Route Integration
+      PayloadFormatVersion: 1.0
+      IntegrationType: AWS_PROXY
+      IntegrationMethod: POST
+      IntegrationUri:
+        !Sub "{{ ApiGatewayUriBase }}arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:{{ ParamCalculatorDivideLambdaName }}/invocations"
+
+  ApiGatewayCalculatorDivideRoute:
+    Type: AWS::ApiGatewayV2::Route
+    DependsOn:
+      - ApiGatewayCalculatorDivideIntegration
+    Properties:
+      ApiId:
+        !Ref "ApiGatewayRestApi"
+      RouteKey: "GET /v1/calculator/divide"
+      Target:
+        Fn::Join:
+          - "/"
+          - - "integrations"
+            - !Ref ApiGatewayCalculatorDivideIntegration
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+      - ApiGatewayCalculatorAddRoute
+      - ApiGatewayCalculatorSubtractRoute
+      - ApiGatewayCalculatorMultiplyRoute
+      - ApiGatewayCalculatorDivideRoute
+    Properties:
+      ApiId:
+        !Ref "ApiGatewayRestApi"
+
+  ApiGatewayStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName:
+        !Sub "{{ ParamApiGatewayStageName }}"
+      Description: "API Deployment Stage"
+      DeploymentId:
+        !Ref ApiGatewayDeployment
+      ApiId:
+        !Ref "ApiGatewayRestApi"
+      Tags:
+        Application: !Sub "{{ ParamTagName }}"
+
+Outputs:
+  OutputApiGatewayRestApiId:
+    Description: The Calculator HTTP Rest API ID
+    Value:
+      !Ref ApiGatewayRestApi

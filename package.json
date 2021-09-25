@@ -1,0 +1,67 @@
+{
+  "name": "calculator-api",
+  "version": "1.0.0",
+  "description": "Calculator API",
+  "main": "src/index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "prebuild": "run-s clean",
+    "build": "./node_modules/.bin/tsc -p tsconfig.json",
+    "postinstall": "ts-node ./src/scripts/symbolic-links-generator.ts",
+    "postbuild": "run-s prepare-lambda",
+    "prepare-lambda": "ts-node ./src/scripts/lambda-build.ts",
+    "test": "mocha -r ts-node/register \"test/**/*.spec.ts?(x)\" --timeout 300000",
+    "test-coverage": "nyc --reporter=html npm test",
+    "format-staged-files": "pretty-quick --staged",
+    "ansible": "cd src/devops && ansible-playbook playbook-main.yaml && cd ../.."
+  },
+  "keywords": [
+    "calculator"
+  ],
+  "author": "Igor V. Teixeira",
+  "license": "ISC",
+  "dependencies": {
+    "joi": "17.4.2"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.83",
+    "@types/fs-extra": "^9.0.13",
+    "@types/shelljs": "0.8.9",
+    "aws-lambda": "^1.0.6",
+    "aws-sdk": "2.994.0",
+    "chai": "4.3.4",
+    "fs-extra": "10.0.0",
+    "husky": "7.0.2",
+    "mocha": "9.1.1",
+    "nodemon": "2.0.12",
+    "npm-run-all": "4.1.5",
+    "prettier": "2.3.2",
+    "pretty-quick": "3.1.1",
+    "shelljs": "0.8.4",
+    "ts-node": "9.1.1",
+    "typescript": "4.1.2",
+    "uglifyjs-webpack-plugin": "2.2.0",
+    "webpack": "5.37.0",
+    "webpack-cli": "4.7.0",
+    "yargs": "16.2.0"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "test/**/*.spec.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "html",
+      "text",
+      "lcov"
+    ]
+  }
+}

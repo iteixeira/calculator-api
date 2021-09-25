@@ -1,0 +1,41 @@
+---
+# Generate template
+- name: Generate cloudformation template
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - {
+        src: "{{ lambda_stack_template_file }}",
+        dest: "{{ lambda_stack_sam_file }}",
+      }
+
+# Validate template
+- name: Validate cloudformation template
+  shell: aws cloudformation validate-template --template-body file://{{ lambda_stack_sam_file }} --region {{ InputRegionId }}
+
+# Upload local artifacts
+- name: Upload local artifacts
+  shell: sam package --template-file {{ lambda_stack_sam_file }} --s3-bucket {{ cf_temporary_bucket_name }} --output-template-file {{ lambda_stack_output_file }}
+  register: exec_sam_package
+- name: debug
+  debug:
+    msg: "{{ exec_sam_package }}"
+
+# Create cloudformation stack
+- name: Create cloudformation Lambda stack
+  cloudformation:
+    stack_name: "{{ lambda_stack_name }}"
+    state: present
+    region: "{{ InputRegionId }}"
+    template: "{{ lambda_stack_output_file }}"
+    capabilities:
+      - CAPABILITY_IAM
+      - CAPABILITY_NAMED_IAM
+      - CAPABILITY_AUTO_EXPAND
+    tags:
+      Stack: "{{ lambda_stack_name }}"
+  register: create_stack
+- name: Debug create cloudformation Lambda stack
+  debug:
+    msg: "{{ create_stack }}"

@@ -1,0 +1,50 @@
+# ============ Input parameters ============
+InputENV: "ivt"
+InputRegionId: "us-east-1"
+# ==========================================
+
+AppName: "calculator"
+ApiGatewayUriBase: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+ParamTagName: "{{ AppName | upper }}"
+ParamENV: "{{ InputENV | upper }}"
+PlaybookDeployDate: "{{ ansible_date_time.epoch }}"
+PlaybookDeployDateISO8601: "{{ ansible_date_time.iso8601 }}"
+
+# ============= Policies names =============
+ParamLambdaInvokePolicyName: "CALCULATOR-LAMBDA-INVOKE-POLICY-{{ ParamENV }}"
+ParamCloudWatchLogsPolicyName: "CALCULATOR-CLOUDWATCH-LOGS-POLICY-{{ ParamENV }}"
+ParamNetworkInterfacePolicyName: "CALCULATOR-NETWORK-INTERFACE-POLICY-{{ ParamENV }}"
+
+# =============== Role names ===============
+ParamCalculatorAddRoleName: "CALCULATOR-ADD-ROLE-{{ ParamENV }}"
+ParamCalculatorSubtractRoleName: "CALCULATOR-SUBTRACT-ROLE-{{ ParamENV }}"
+ParamCalculatorMultiplyRoleName: "CALCULATOR-MULTIPLY-ROLE-{{ ParamENV }}"
+ParamCalculatorDivideRoleName: "CALCULATOR-DIVIDE-ROLE-{{ ParamENV }}"
+
+# ================= Lambda =================
+ParamCalculatorAddLambdaName: "CALCULATOR-ADD-{{ ParamENV }}"
+ParamCalculatorSubtractLambdaName: "CALCULATOR-SUBTRACT-{{ ParamENV }}"
+ParamCalculatorMultiplyLambdaName: "CALCULATOR-MULTIPLY-{{ ParamENV }}"
+ParamCalculatorDivideLambdaName: "CALCULATOR-DIVIDE-{{ ParamENV }}"
+
+# ============== API Gateway ===============
+ParamApiGatewayName: "CALCULATOR-GATEWAY-{{ ParamENV }}"
+ParamApiGatewayStageName: "STAGE-{{ ParamENV }}"
+
+# ============== Stack config ==============
+cf_temporary_bucket_name: "calculator-cf-bucket-{{ InputENV }}-{{ PlaybookDeployDate }}"
+
+iam_stack_name: "cloudformation-calculator-iam-stack-{{ InputENV }}"
+iam_stack_output_file: "cloudformation-calculator-iam.yml"
+iam_stack_sam_file: "sam-cloudformation-calculator-iam.yml"
+iam_stack_template_file: "template-cf-calculator-iam-stack.yaml.j2"
+
+lambda_stack_name: "cloudformation-calculator-lambda-stack-{{ InputENV }}"
+lambda_stack_output_file: "cloudformation-calculator-lambda.yml"
+lambda_stack_sam_file: "sam-cloudformation-calculator-lambda.yml"
+lambda_stack_template_file: "template-cf-calculator-lambda-stack.yaml.j2"
+
+gateway_stack_name: "cloudformation-calculator-gateway-stack-{{ InputENV }}"
+gateway_stack_output_file: "cloudformation-calculator-gateway.yml"
+gateway_stack_sam_file: "sam-cloudformation-calculator-gateway.yml"
+gateway_stack_template_file: "template-cf-calculator-gateway-stack.yaml.j2"

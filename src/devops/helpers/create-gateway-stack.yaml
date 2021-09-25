@@ -1,0 +1,41 @@
+---
+# Generate template
+- name: Generate cloudformation template
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - {
+        src: "{{ gateway_stack_template_file }}",
+        dest: "{{ gateway_stack_sam_file }}",
+      }
+
+# Validate template
+- name: Validate cloudformation template
+  shell: aws cloudformation validate-template --template-body file://{{ gateway_stack_sam_file }} --region {{ InputRegionId }}
+
+# Upload local artifacts
+- name: Upload local artifacts
+  shell: sam package --template-file {{ gateway_stack_sam_file }} --s3-bucket {{ cf_temporary_bucket_name }} --output-template-file {{ gateway_stack_output_file }}
+  register: exec_sam_package
+- name: debug
+  debug:
+    msg: "{{ exec_sam_package }}"
+
+# Create cloudformation stack
+- name: Create cloudformation API Gateway stack
+  cloudformation:
+    stack_name: "{{ gateway_stack_name }}"
+    state: present
+    region: "{{ InputRegionId }}"
+    template: "{{ gateway_stack_output_file }}"
+    capabilities:
+      - CAPABILITY_IAM
+      - CAPABILITY_NAMED_IAM
+      - CAPABILITY_AUTO_EXPAND
+    tags:
+      Stack: "{{ gateway_stack_name }}"
+  register: create_stack
+- name: Debug create cloudformation API Gateway stack
+  debug:
+    msg: "{{ create_stack }}"

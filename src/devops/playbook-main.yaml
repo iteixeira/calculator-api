@@ -1,0 +1,50 @@
+- name: Playbook Calculator API
+  hosts: localhost
+  connection: local
+  become: no
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Clean local files
+      include_tasks: "helpers/clean-local-files.yaml"
+
+  tasks:
+    # 1. Create a temporary bucket for cloudformation
+    - name: Create temporary stack bucket
+      s3_bucket:
+        name: "{{ cf_temporary_bucket_name }}"
+        region: "{{ InputRegionId }}"
+      register: create_sam_bucket
+
+    - name: Debug create temporary stack bucket
+      debug:
+        msg: "{{ create_sam_bucket }}"
+
+    # 2. Build backend code
+    - name: Build backend code
+      include_tasks: "helpers/build-backend-code.yaml"
+
+    # 3. Create IAM cloudformation stack
+    - name: Create IAM cloudformation stack
+      include_tasks: "helpers/create-iam-stack.yaml"
+
+    # 4. Create Lambda cloudformation stack
+    - name: Create Lambda cloudformation stack
+      include_tasks: "helpers/create-lambda-stack.yaml"
+
+    # 5. Create API Gateway cloudformation stack
+    - name: Create API Gateway cloudformation stack
+      include_tasks: "helpers/create-gateway-stack.yaml"
+
+    # 6. Delete cloudformation temporary bucket
+    - name: Delete cloudformation temporary bucket
+      s3_bucket:
+        name: "{{ cf_temporary_bucket_name }}"
+        region: "{{ InputRegionId }}"
+        state: absent
+        force: true
+      ignore_errors: true
+
+    # 7. Clean local files
+    - name: Clean local files
+      include_tasks: "helpers/clean-local-files.yaml"

@@ -1,0 +1,136 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "Calculator Lambda Stack - {{ ParamENV }} (updated at: {{ PlaybookDeployDateISO8601 }})."
+Parameters:
+  ParamTagName:
+    Type: String
+    Default: {{ ParamTagName }}
+
+  # IAM
+  ParamCalculatorAddRoleName:
+    Type: String
+    Default: {{ ParamCalculatorAddRoleName }}
+
+  ParamCalculatorSubtractRoleName:
+    Type: String
+    Default: {{ ParamCalculatorSubtractRoleName }}
+    
+  ParamCalculatorMultiplyRoleName:
+    Type: String
+    Default: {{ ParamCalculatorMultiplyRoleName }}
+    
+  ParamCalculatorDivideRoleName:
+    Type: String
+    Default: {{ ParamCalculatorDivideRoleName }}
+
+  # Lambda
+  ParamCalculatorAddLambdaName:
+    Type: String
+    Default: {{ ParamCalculatorAddLambdaName }}
+
+  ParamCalculatorSubtractLambdaName:
+    Type: String
+    Default: {{ ParamCalculatorSubtractLambdaName }}
+    
+  ParamCalculatorMultiplyLambdaName:
+    Type: String
+    Default: {{ ParamCalculatorMultiplyLambdaName }}
+    
+  ParamCalculatorDivideLambdaName:
+    Type: String
+    Default: {{ ParamCalculatorDivideLambdaName }}
+
+Resources:
+  # =============== Lambdas ===============
+  CalculatorAddLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Calculator Add Lambda
+      FunctionName: !Ref ParamCalculatorAddLambdaName
+      Handler: app.handler
+      CodeUri: "../../dist/src/lambdas/calculator-add/"
+      Timeout: 30
+      MemorySize: 128
+      Role:
+        Fn::ImportValue: 
+          !Ref ParamCalculatorAddRoleName
+      Runtime: nodejs14.x
+      Tags:
+        Application: !Sub "{{ ParamTagName }}"
+  
+  CalculatorSubtractLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Calculator Subtract Lambda
+      FunctionName: !Ref ParamCalculatorSubtractLambdaName
+      Handler: app.handler
+      CodeUri: "../../dist/src/lambdas/calculator-subtract/"
+      Timeout: 30
+      MemorySize: 128
+      Role:
+        Fn::ImportValue: 
+          !Ref ParamCalculatorSubtractRoleName
+      Runtime: nodejs14.x
+      Tags:
+        Application: !Sub "{{ ParamTagName }}"
+  
+  CalculatorMultiplyLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Calculator Multiply Lambda
+      FunctionName: !Ref ParamCalculatorMultiplyLambdaName
+      Handler: app.handler
+      CodeUri: "../../dist/src/lambdas/calculator-multiply/"
+      Timeout: 30
+      MemorySize: 128
+      Role:
+        Fn::ImportValue: 
+          !Ref ParamCalculatorMultiplyRoleName
+      Runtime: nodejs14.x
+      Tags:
+        Application: !Sub "{{ ParamTagName }}"
+  
+  CalculatorDivideLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Calculator Divide Lambda
+      FunctionName: !Ref ParamCalculatorDivideLambdaName
+      Handler: app.handler
+      CodeUri: "../../dist/src/lambdas/calculator-divide/"
+      Timeout: 30
+      MemorySize: 128
+      Role:
+        Fn::ImportValue: 
+          !Ref ParamCalculatorDivideRoleName
+      Runtime: nodejs14.x
+      Tags:
+        Application: !Sub "{{ ParamTagName }}"
+
+Outputs:
+  OutputCalculatorAddLambdaArn:
+    Description: Output for Calculator Add Lambda
+    Value:
+      !GetAtt CalculatorAddLambda.Arn
+    Export:
+      Name: !Ref ParamCalculatorAddLambdaName
+
+  OutputCalculatorSubtractLambdaArn:
+    Description: Output for Calculator Subtract Lambda
+    Value:
+      !GetAtt CalculatorSubtractLambda.Arn
+    Export:
+      Name: !Ref ParamCalculatorSubtractLambdaName
+
+  OutputCalculatorMultiplyLambdaArn:
+    Description: Output for Calculator Multiply Lambda
+    Value:
+      !GetAtt CalculatorMultiplyLambda.Arn
+    Export:
+      Name: !Ref ParamCalculatorMultiplyLambdaName
+
+  OutputCalculatorDivideLambdaArn:
+    Description: Output for Calculator Divide Lambda
+    Value:
+      !GetAtt CalculatorDivideLambda.Arn
+    Export:
+      Name: !Ref ParamCalculatorDivideLambdaName

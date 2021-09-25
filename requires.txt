@@ -1,0 +1,12 @@
+Instruções
+
+sudo apt-add-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible -y
+
+https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html#cliv2-linux-install
+
+pip3 install boto3
+
+https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-linux.html
+
+criar .aws/credentials e .aws/config

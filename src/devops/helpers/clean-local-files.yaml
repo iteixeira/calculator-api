@@ -1,0 +1,12 @@
+---
+- name: Clean local files
+  file:
+    state: absent
+    path: "{{ item }}"
+  loop:
+    - "{{ iam_stack_sam_file }}"
+    - "{{ iam_stack_output_file }}"
+    - "{{ lambda_stack_sam_file }}"
+    - "{{ lambda_stack_output_file }}"
+    - "{{ gateway_stack_sam_file }}"
+    - "{{ gateway_stack_output_file }}"
