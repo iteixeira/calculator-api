@@ -1,6 +1,6 @@
 # ============ Input parameters ============
 InputENV: "ivt"
-InputRegionId: "us-east-1"
+InputRegionId: "us-east-2"
 # ==========================================
 
 AppName: "calculator"
